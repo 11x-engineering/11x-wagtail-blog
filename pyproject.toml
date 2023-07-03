@@ -48,7 +48,7 @@ test = [
 ]
 
 github = [
-    "tox-gh-actions",
+    "tox-gh-actions >=3.0",
 ]
 
 

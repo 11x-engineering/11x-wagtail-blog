@@ -5,9 +5,31 @@ from modelcluster.fields import ParentalKey
 from wagtail.admin.panels import FieldPanel, InlinePanel
 from wagtail.fields import StreamField, RichTextField
 from wagtail.models import Page
+from wagtail.snippets.blocks import SnippetChooserBlock
+from wagtail.snippets.models import register_snippet
 from wagtailmarkdown.blocks import MarkdownBlock
 
 _RICH_TEXT_SUMMARY_FEATURES = getattr(settings, "X11X_WAGTAIL_BLOG_SUMMARY_FEATURES", ["bold", "italic", "code", "superscript", "subscript", "strikethrough"])
+
+
+@register_snippet
+class AboutTheAuthor(models.Model):
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.RESTRICT,
+        editable=True,
+        blank=False,
+        related_name="about_the_author_snippets",
+    )
+    body = RichTextField()
+
+    panels = [
+        FieldPanel("author"),
+        FieldPanel("body"),
+    ]
+
+    def __str__(self):
+        return str(self.author)
 
 
 class RelatedArticles(models.Model):
@@ -33,6 +55,14 @@ class ArticlePage(Page):
         use_json_field=True,
     )
 
+    authors = StreamField(
+        [
+            ("about_the_authors", SnippetChooserBlock(AboutTheAuthor)),
+        ],
+        default=list,
+        use_json_field=True,
+    )
+
     settings_panels = Page.settings_panels + [
         FieldPanel("date"),
         FieldPanel("owner"),
@@ -41,6 +71,7 @@ class ArticlePage(Page):
         FieldPanel("title_image"),
         FieldPanel("summary"),
         FieldPanel("body"),
+        FieldPanel("authors"),
         InlinePanel(
             "related_article_from",
             label="Related Articles",
@@ -50,6 +81,9 @@ class ArticlePage(Page):
 
     def get_template(self, request, *args, **kwargs):
         return getattr(settings, "X11X_WAGTAIL_BLOG_ARTICLE_TEMPLATE", "x11x_wagtail_blog/article_page.html")
+
+    def has_related_articles(self):
+        return self.related_article_from.all().count() > 0
 
     @property
     def related_articles(self):

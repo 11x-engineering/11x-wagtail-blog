@@ -1,9 +1,10 @@
 from django.utils import timezone
 from django.test import override_settings
+from faker import Faker
 from wagtail.test.utils import WagtailPageTestCase
 from wagtail.models import Page
-from faker import Faker
 from wagtail.images import get_image_model
+from wagtail.users.models import UserProfile
 
 from x11x_wagtail_blog.models import ArticlePage
 from x11x_wagtail_blog.fakers import X11XWagtailBlogProvider
@@ -20,27 +21,6 @@ Image = get_image_model()
 class TestBlogPages(WagtailPageTestCase):
     def setUp(self):
         self.home = Page.objects.get(slug="home")
-
-    def test_blog_has_title_image(self):
-        author = self.create_user("username")
-
-        image_base_name = "test-image"
-        image_extension = "png"
-
-        header_image = Image.objects.create(
-            title=fake.word(),
-            file=fake.title_image_file(
-                name=f"{image_base_name}.{image_extension}",
-            )
-        )
-        page = fake.article_page(owner=author)
-        page.title_image = header_image
-        self.home.add_child(instance=page)
-
-        response = self.client.get(page.full_url)
-        self.assertContains(response, page.title_image.title)
-        self.assertContains(response, image_base_name)
-        self.assertContains(response, image_extension)
 
     def test_blog_articles_have_the_basic_fields(self):
         content = fake.paragraph()
@@ -76,6 +56,27 @@ class TestBlogPages(WagtailPageTestCase):
             "x11x_wagtail_blog_testing/article_page.html",
         )
 
+    def test_blog_has_title_image(self):
+        author = self.create_user("username")
+
+        image_base_name = "test-image"
+        image_extension = "png"
+
+        header_image = Image.objects.create(
+            title=fake.word(),
+            file=fake.title_image_file(
+                name=f"{image_base_name}.{image_extension}",
+            )
+        )
+        page = fake.article_page(owner=author)
+        page.title_image = header_image
+        self.home.add_child(instance=page)
+
+        response = self.client.get(page.full_url)
+        self.assertContains(response, page.title_image.title)
+        self.assertContains(response, image_base_name)
+        self.assertContains(response, image_extension)
+
     def test_related_articles_are_rendered_properly(self):
         owner = self.create_user("username")
 
@@ -96,3 +97,22 @@ class TestBlogPages(WagtailPageTestCase):
         response = self.client.get(page.full_url)
         for related_page in [related_page_a, related_page_b]:
             self.assertContains(response, f"<a href=\"{related_page.url}\">{related_page.title}</a>")
+
+    def test_about_the_author_content(self):
+        owner = self.create_user("username")
+
+        owner.wagtail_userprofile = UserProfile()
+        owner.wagtail_userprofile.avatar = fake.avatar_image_file()
+        owner.wagtail_userprofile.save()
+
+        snippet = fake.about_the_author(owner)
+        snippet.save()
+
+        page = fake.article_page(owner=owner)
+        page.authors = [("about_the_authors", snippet)]
+
+        self.home.add_child(instance=page)
+
+        response = self.client.get(page.url)
+        self.assertContains(response, snippet.body)
+        self.assertContains(response, owner.wagtail_userprofile.avatar.url)

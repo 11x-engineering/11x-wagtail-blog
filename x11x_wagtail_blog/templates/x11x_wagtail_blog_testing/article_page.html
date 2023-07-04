@@ -1,4 +1,4 @@
-{% load wagtailcore_tags wagtailimages_tags %}
+{% load x11x_wagtail_blog wagtailcore_tags wagtailimages_tags %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -11,6 +11,10 @@
         {% image self.title_image original %}
 
         {% include_block self.body %}
+
+        {% for author in self.authors %}
+            {% about_the_author author.value %}
+        {% endfor %}
 
         {% for related in self.related_articles %}
         <a href="{% pageurl related %}">{{ related.title }}</a>

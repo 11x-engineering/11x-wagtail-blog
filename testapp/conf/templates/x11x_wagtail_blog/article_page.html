@@ -1,4 +1,4 @@
-{% load static wagtailimages_tags wagtailcore_tags %}
+{% load static x11x_wagtail_blog wagtailimages_tags wagtailcore_tags %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -13,12 +13,18 @@
                 {% image self.title_image fill-400x200-c50 %}
             </header>
             {% include_block self.body %}
+            <h4>About the Author</h4>
+            {% for author in self.authors %}
+            {% about_the_author author.value heading='div' %}
+            {% endfor %}
         </article>
+        {% if self.has_related_articles %}
         <div>
             <h1>Related Articles</h1>
             {% for related in self.related_articles %}
             <a href="{% pageurl related %}">{{ related.title }}</a>
             {% endfor %}
         </div>
+        {% endif %}
     </body>
 </html>

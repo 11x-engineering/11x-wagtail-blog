@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "search",
 
     "x11x_wagtail_blog",
+    "wagtailmarkdown",
 
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
@@ -162,3 +163,7 @@ WAGTAILSEARCH_BACKENDS = {
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
 WAGTAILADMIN_BASE_URL = "http://example.com"
+
+WAGTAILMARKDOWN = {
+    "extensions": ["markdown.extensions.codehilite"]
+}

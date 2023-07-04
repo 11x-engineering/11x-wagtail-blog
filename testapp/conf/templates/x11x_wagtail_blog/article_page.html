@@ -1,0 +1,24 @@
+{% load static wagtailimages_tags wagtailcore_tags %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{{ self.title }}</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/code.css' %}"/>
+    </head>
+    <body>
+        <article>
+            <header>
+                {{ self.owner.first_name }} {{ self.owner.last_name }}
+                {{ self.date.day }}/{{ self.date.month }}/{{ self.date.year }}
+                {% image self.title_image fill-400x200-c50 %}
+            </header>
+            {% include_block self.body %}
+        </article>
+        <div>
+            <h1>Related Articles</h1>
+            {% for related in self.related_articles %}
+            <a href="{% pageurl related %}">{{ related.title }}</a>
+            {% endfor %}
+        </div>
+    </body>
+</html>

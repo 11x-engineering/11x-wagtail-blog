@@ -5,6 +5,7 @@ from modelcluster.fields import ParentalKey
 from wagtail.admin.panels import FieldPanel, InlinePanel
 from wagtail.fields import StreamField, RichTextField
 from wagtail.models import Page
+from wagtail.search import index
 from wagtail.snippets.blocks import SnippetChooserBlock
 from wagtail.snippets.models import register_snippet
 from wagtailmarkdown.blocks import MarkdownBlock
@@ -62,6 +63,10 @@ class ArticlePage(Page):
         default=list,
         use_json_field=True,
     )
+
+    search_fields = [
+        index.SearchField("body"),
+    ]
 
     settings_panels = Page.settings_panels + [
         FieldPanel("date"),

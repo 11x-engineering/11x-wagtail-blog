@@ -64,7 +64,7 @@ class ArticlePage(Page):
         use_json_field=True,
     )
 
-    search_fields = [
+    search_fields = Page.search_fields + [
         index.SearchField("body"),
     ]
 

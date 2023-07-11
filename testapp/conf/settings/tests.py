@@ -13,6 +13,8 @@ DATABASES = {
     }
 }
 
+INSTALLED_APPS = ["x11x_wagtail_blog.tests.testing_models"] + INSTALLED_APPS
+
 try:
     from .local import *
 except ImportError:

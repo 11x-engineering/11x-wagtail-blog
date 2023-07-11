@@ -5,10 +5,8 @@ from modelcluster.fields import ParentalKey
 from wagtail.admin.panels import FieldPanel, InlinePanel
 from wagtail.fields import StreamField, RichTextField
 from wagtail.models import Page
-from wagtail.search import index
 from wagtail.snippets.blocks import SnippetChooserBlock
 from wagtail.snippets.models import register_snippet
-from wagtailmarkdown.blocks import MarkdownBlock
 
 _RICH_TEXT_SUMMARY_FEATURES = getattr(settings, "X11X_WAGTAIL_BLOG_SUMMARY_FEATURES", ["bold", "italic", "code", "superscript", "subscript", "strikethrough"])
 
@@ -34,11 +32,11 @@ class AboutTheAuthor(models.Model):
 
 
 class RelatedArticles(models.Model):
-    related_to = ParentalKey("ArticlePage", verbose_name="Article", related_name="related_article_to")
-    related_from = ParentalKey("ArticlePage", verbose_name="Article", related_name="related_article_from")
+    related_to = ParentalKey("ExtensibleArticlePage", verbose_name="Article", related_name="related_article_to")
+    related_from = ParentalKey("ExtensibleArticlePage", verbose_name="Article", related_name="related_article_from")
 
 
-class ArticlePage(Page):
+class ExtensibleArticlePage(Page):
     date = models.DateTimeField(default=timezone.now, null=False, blank=False, editable=True)
     summary = RichTextField(features=_RICH_TEXT_SUMMARY_FEATURES, default="", blank=True, null=False)
     title_image = models.ForeignKey(
@@ -49,33 +47,27 @@ class ArticlePage(Page):
         blank=True,
     )
 
-    body = StreamField(
-        [
-            ("markdown", MarkdownBlock()),
-        ],
-        use_json_field=True,
-    )
-
     authors = StreamField(
         [
             ("about_the_authors", SnippetChooserBlock(AboutTheAuthor)),
         ],
         default=list,
         use_json_field=True,
+        blank=True,
     )
 
-    search_fields = Page.search_fields + [
-        index.SearchField("body"),
-    ]
+    is_creatable = False
 
     settings_panels = Page.settings_panels + [
         FieldPanel("date"),
         FieldPanel("owner"),
     ]
-    content_panels = Page.content_panels + [
+
+    pre_body_content_panels = Page.content_panels + [
         FieldPanel("title_image"),
         FieldPanel("summary"),
-        FieldPanel("body"),
+    ]
+    post_body_content_panels = [
         FieldPanel("authors"),
         InlinePanel(
             "related_article_from",
@@ -83,6 +75,10 @@ class ArticlePage(Page):
             panels=[FieldPanel("related_to")]
         )
     ]
+
+    @classmethod
+    def with_body_panels(cls, panels):
+        return cls.pre_body_content_panels + panels + cls.post_body_content_panels
 
     def get_template(self, request, *args, **kwargs):
         return getattr(settings, "X11X_WAGTAIL_BLOG_ARTICLE_TEMPLATE", "x11x_wagtail_blog/article_page.html")

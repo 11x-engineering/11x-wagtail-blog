@@ -6,6 +6,7 @@
         <link rel="stylesheet" type="text/css" href="{% static 'css/code.css' %}"/>
     </head>
     <body>
+        {% block content %}
         <article>
             <header>
                 {{ self.owner.first_name }} {{ self.owner.last_name }}
@@ -26,5 +27,6 @@
             {% endfor %}
         </div>
         {% endif %}
+        {% endblock content %}
     </body>
 </html>

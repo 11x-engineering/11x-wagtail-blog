@@ -28,7 +28,7 @@ jobs:
       run: |
         python -m pip install -U pip
         python -m pip install flit
-        flit install --deps all
+        flit install --deps all --only-deps
     - name: Run Tests
       run: |
         tox --skip-missing-interpreters=false
@@ -44,7 +44,7 @@ jobs:
       run: |
         python -m pip install -U pip
         python -m pip install flit
-        flit install --deps all
+        flit install --deps all --only-deps
     - name: Ensure that the documentation can be built
       run: |
         cd docs && make html

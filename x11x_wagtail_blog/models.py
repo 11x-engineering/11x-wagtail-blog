@@ -76,6 +76,9 @@ class ExtensibleArticlePage(Page):
         )
     ]
 
+    def has_authors(self):
+        return len(self.authors) > 0
+
     @classmethod
     def with_body_panels(cls, panels):
         return cls.pre_body_content_panels + panels + cls.post_body_content_panels

@@ -45,7 +45,7 @@ class TestArticlePages(WagtailPageTestCase):
             summary=summary_text,
             date=publishing_date
         )
-        self.home.add_child(instance=page)
+        self.publish(page)
 
         response = self.client.get(page.full_url)
         self.assertContains(response, content)
@@ -58,6 +58,24 @@ class TestArticlePages(WagtailPageTestCase):
             response,
             "x11x_wagtail_blog/tests/testing_models/testing_article_page.html",
         )
+
+    def test_model_has_authors_returns_fals_when_not_configured_with_authors(self):
+        page = fake.testing_article_page()
+        self.publish(page)
+
+        self.assertFalse(page.has_authors())
+
+    def test_model_has_authors_returns_true_when_configured_with_authors(self):
+        author = self.create_user("username")
+
+        snippet = fake.about_the_author(author)
+        snippet.save()
+
+        page = fake.testing_article_page()
+        page.authors = [("about_the_authors", snippet)]
+        self.publish(page)
+
+        self.assertTrue(page.has_authors())
 
     def test_blog_has_title_image(self):
         author = self.create_user("username")
@@ -73,7 +91,7 @@ class TestArticlePages(WagtailPageTestCase):
         )
         page = fake.testing_article_page(owner=author)
         page.title_image = header_image
-        self.home.add_child(instance=page)
+        self.publish(page)
 
         response = self.client.get(page.full_url)
         self.assertContains(response, page.title_image.title)
@@ -95,7 +113,7 @@ class TestArticlePages(WagtailPageTestCase):
             owner=owner,
         )
         page.related_articles = [related_page_a, related_page_b]
-        self.home.add_child(instance=page)
+        self.publish(page)
 
         response = self.client.get(page.full_url)
         for related_page in [related_page_a, related_page_b]:
@@ -114,7 +132,7 @@ class TestArticlePages(WagtailPageTestCase):
         page = fake.testing_article_page(owner=owner)
         page.authors = [("about_the_authors", snippet)]
 
-        self.home.add_child(instance=page)
+        self.publish(page)
 
         response = self.client.get(page.url)
         self.assertContains(response, snippet.body)
@@ -130,7 +148,10 @@ class TestArticlePages(WagtailPageTestCase):
             body=[("text", content)],
             owner=owner,
         )
-        self.home.add_child(instance=page)
+        self.publish(page)
 
         response = self.client.get(page.full_url)
         self.assertContains(response, content)
+
+    def publish(self, page):
+        self.home.add_child(instance=page)

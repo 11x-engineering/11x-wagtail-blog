@@ -8,6 +8,7 @@ register = template.Library()
 
 @register.inclusion_tag("x11x_wagtail_blog/about_the_author.html")
 def about_the_author(snippet: AboutTheAuthor, *, heading="h4"):
+    # Deprecated, do not use.
     try:
         avatar = snippet.author.wagtail_userprofile.avatar
     except ObjectDoesNotExist:

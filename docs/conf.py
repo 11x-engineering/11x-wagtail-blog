@@ -5,14 +5,26 @@
 
 # -- System set up -----------------------------------------------------
 import os
+from pathlib import Path
 import sys
 
-_docs_root = os.path.dirname(
-    os.path.abspath(__file__)
-)
-sys.path.insert(0, os.path.dirname(_docs_root))
+import django
 
+_docs_root = Path(__file__).parent
 
+sys.path.insert(0, str(_docs_root.parent))
+sys.path.insert(0, str(_docs_root.parent / "testapp"))
+
+os.environ["DJANGO_SETTINGS_MODULE"] = "conf.settings.tests"
+django.setup()
+
+autodoc_class_signature = "separated"
+autodoc_typehints = "none"
+autodoc_member_order = "bysource"
+autodoc_default_options = {
+    "no-value": True,
+    "member-order": "bysource",
+}
 # ---------------------------------------------------------------------------------------- #
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
